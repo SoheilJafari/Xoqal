@@ -101,15 +101,20 @@ namespace Xoqal.Web.Mvc.Security
             var user = Authentication.Default.GetCurrentUserPrincipal();
             if (!this.IsAuthorized(user))
             {
-                filterContext.Result = new HttpUnauthorizedResult();
-
                 if (!string.IsNullOrWhiteSpace(this.LoginUrl) && !suppressCustomLoginRedirect)
                 {
                     string loginUrl = VirtualPathUtility.ToAbsolute(this.LoginUrl);
                     loginUrl = loginUrl + (this.LoginUrl.Contains("?") ? "&" : "?") + "ReturnUrl=" +
                         HttpUtility.UrlEncode(filterContext.HttpContext.Request.Url.PathAndQuery);
-                    filterContext.HttpContext.Response.Redirect(loginUrl);
+
+                    // Redirect through the result rather than Response.Redirect: that call sends the headers
+                    // straight away, and MVC then failed to set the 401 of an HttpUnauthorizedResult on top of
+                    // them ("Server cannot set status after HTTP headers have been sent").
+                    filterContext.Result = new RedirectResult(loginUrl);
+                    return;
                 }
+
+                filterContext.Result = new HttpUnauthorizedResult();
             }
         }
 
