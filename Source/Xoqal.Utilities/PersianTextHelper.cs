@@ -70,7 +70,7 @@ namespace Xoqal.Utilities
         }
 
         /// <summary>
-        /// Converts to english digit.
+        /// Converts the Persian (۰-۹) and Arabic-Indic (٠-٩) digits in the given string to the English digits.
         /// </summary>
         /// <param name="source">The source.</param>
         /// <returns></returns>
@@ -81,9 +81,12 @@ namespace Xoqal.Utilities
                 return source;
             }
 
+            var arabicNums = new[] { "٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩" };
             for (var i = 0; i <= 9; i++)
             {
-                source = source.Replace(ConvertToPersianDigit(i.ToString()), i.ToString());
+                source = source
+                    .Replace(ConvertToPersianDigit(i.ToString()), i.ToString())
+                    .Replace(arabicNums[i], i.ToString());
             }
 
             return source;
